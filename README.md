@@ -34,6 +34,8 @@ Simulating Hadoop MapReduce Streaming in a multicore computer. Any mapper, reduc
 - Essential
     - bash
     - GNU parallel
+    - sort
+    - python
 
 - Recommanded
     - pv
