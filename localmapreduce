@@ -1,9 +1,5 @@
 #!/bin/bash
 
-#### Example ####
-# cat data | sh local_mapreduce.sh 100k 10 'tr -sc "a-zA-Z" "\n"' 'uniq -c' result        
-# pv data | sh local_mapreduce.sh 0.8m 10 'python map.py' 'python reduce.py' result_dir
-
 BLOCKSIZE="$1"
 NUM_HASHING_SEGS="$2"
 MAPPER="$3"
