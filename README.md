@@ -176,6 +176,7 @@ aaa bbb aaa     1
 
 reducer *nc-reduce.py*
 ```python
+#!/usr/bin/python
 import fileinput
 from collections import Counter, defaultdict
 ngram_counts = defaultdict(Counter)
