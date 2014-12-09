@@ -136,7 +136,7 @@ $ cat out/* | head
 mapper *nc-map.py*
 
 ```python
-#!/usr/bin/python
+#!/usr/bin/env python
 import re
 def tokens(str1): return re.findall('[a-z]+', str1.lower())
 
@@ -175,7 +175,9 @@ aaa bbb aaa     1
 ### reducer
 
 reducer *nc-reduce.py*
+
 ```python
+#!/usr/bin/env python
 import fileinput
 from collections import Counter, defaultdict
 ngram_counts = defaultdict(Counter)
