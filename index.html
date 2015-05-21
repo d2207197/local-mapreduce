@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="UTF-8">
+    <title>Local-mapreduce by d2207197</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
+  </head>
+  <body>
+    <section class="page-header">
+      <h1 class="project-name">Local-mapreduce</h1>
+      <h2 class="project-tagline"></h2>
+      <a href="https://github.com/d2207197/local-mapreduce" class="btn">View on GitHub</a>
+      <a href="https://github.com/d2207197/local-mapreduce/zipball/master" class="btn">Download .zip</a>
+      <a href="https://github.com/d2207197/local-mapreduce/tarball/master" class="btn">Download .tar.gz</a>
+    </section>
+
+    <section class="main-content">
+      <h1>
+<a id="local-mapreduce" class="anchor" href="#local-mapreduce" aria-hidden="true"><span class="octicon octicon-link"></span></a>Local MapReduce</h1>
+
+<p>Simulating Hadoop MapReduce Streaming in a multicore computer. Any mapper, reducer compatible with Hadoop Streaming can work on this shell script.</p>
+
+<h2>
+<a id="performance-comparison" class="anchor" href="#performance-comparison" aria-hidden="true"><span class="octicon octicon-link"></span></a>Performance Comparison</h2>
+
+<ul>
+<li>
+<p>single process</p>
+
+<p>Elapsed time: 7 mins 9 secs</p>
+
+<div class="highlight highlight-console"><pre>$ <span class="pl-s1"><span class="pl-k">time</span> pv citeseerx_descriptions_sents.txt.300000 <span class="pl-k">|</span> python map.py <span class="pl-k">|</span> sort -k1 <span class="pl-k">|</span> python reduce.py <span class="pl-k">&gt;</span> result_single</span>
+<span class="pl-mo">37.6MiB 0:01:12 [ 528KiB/s] [====================================================================================================&gt;] 100%</span>
+<span class="pl-mo">pv citeseerx_descriptions_sents.txt.300000  0.06s user 0.18s system 0% cpu 1:12.81 total</span>
+<span class="pl-mo">python map.py  156.55s user 2.34s system 76% cpu 3:27.56 total</span>
+<span class="pl-mo">sort -k1  67.68s user 1.94s system 16% cpu 7:09.31 total</span>
+<span class="pl-mo">python reduce.py &gt; result_single  217.10s user 0.26s system 50% cpu 7:09.38 total</span></pre></div>
+</li>
+<li>
+<p>localmapreduce</p>
+
+<p>Elapsed time: 1 min 18 secs. Five times faster</p>
+
+<div class="highlight highlight-console"><pre>$ <span class="pl-s1">rm -r result <span class="pl-k">;</span> <span class="pl-k">time</span> pv citeseerx_descriptions_sents.txt.300000 <span class="pl-k">|</span> ./localmapreduce 2m 16 <span class="pl-s"><span class="pl-pds">'</span>python map.py<span class="pl-pds">'</span></span> <span class="pl-s"><span class="pl-pds">'</span>python reduce.py<span class="pl-pds">'</span></span> result</span>
+<span class="pl-mo">37.6MiB 0:00:23 [1.58MiB/s] [====================================================================================================&gt;] 100%</span>
+<span class="pl-mo">pv citeseerx_descriptions_sents.txt.300000  0.01s user 0.03s system 0% cpu 23.789 total</span>
+<span class="pl-mo">./localmapreduce 2m 16 'python map.py' 'python reduce.py' result  1024.95s user 11.64s system 1318% cpu 1:18.63 total</span></pre></div>
+</li>
+</ul>
+
+<h2>
+<a id="prerequisite" class="anchor" href="#prerequisite" aria-hidden="true"><span class="octicon octicon-link"></span></a>Prerequisite</h2>
+
+<ul>
+<li>
+<p>Essential</p>
+
+<ul>
+<li>bash</li>
+<li>GNU parallel</li>
+<li>sort</li>
+<li>python</li>
+</ul>
+</li>
+<li>
+<p>Recommanded</p>
+
+<ul>
+<li>pv</li>
+</ul>
+</li>
+</ul>
+
+<h2>
+<a id="usage" class="anchor" href="#usage" aria-hidden="true"><span class="octicon octicon-link"></span></a>Usage</h2>
+
+<div class="highlight highlight-console"><pre>$ <span class="pl-s1">cat <span class="pl-k">&lt;</span>data<span class="pl-k">&gt;</span> <span class="pl-k">|</span> ./localmapreduce <span class="pl-k">&lt;</span>chunk size<span class="pl-k">&gt;</span> <span class="pl-k">&lt;</span>num of reducer<span class="pl-k">&gt;</span> <span class="pl-k">&lt;</span>mapper<span class="pl-k">&gt;</span> <span class="pl-k">&lt;</span>reducer<span class="pl-k">&gt;</span> <span class="pl-k">&lt;</span>output directory<span class="pl-k">&gt;</span></span>
+$ <span class="pl-s1">./localmapreduce <span class="pl-k">&lt;</span>chunk size<span class="pl-k">&gt;</span> <span class="pl-k">&lt;</span>num of <span class="pl-c1">jobs</span><span class="pl-k">&gt;</span> <span class="pl-k">&lt;</span>mapper<span class="pl-k">&gt;</span> <span class="pl-k">&lt;</span>reducer<span class="pl-k">&gt;</span> <span class="pl-k">&lt;</span>output directory<span class="pl-k">&gt;</span> <span class="pl-k">&lt;</span> <span class="pl-k">&lt;</span>data<span class="pl-k">&gt;</span></span></pre></div>
+
+<ul>
+<li>
+<code>&lt;chunk size&gt;</code>: Split input data into chunks with <code>&lt;chunk size&gt;</code>. The number of chunks equals to the total number of mapper.</li>
+<li>
+<code>&lt;num of reducer&gt;</code>: Each output line from mappers would then be hashed into <code>&lt;num of reducer&gt;</code> different reducer.</li>
+<li>
+<code>&lt;mapper&gt;</code>, <code>&lt;reducer&gt;</code>: Any executable shell command can be mapper or reducer.</li>
+<li>
+<code>&lt;output directory&gt;</code>: The output directory.</li>
+</ul>
+
+<h2>
+<a id="mapper-output-format" class="anchor" href="#mapper-output-format" aria-hidden="true"><span class="octicon octicon-link"></span></a>Mapper Output Format</h2>
+
+<p>Mapper reads input from Standard Input and prints <code>key&lt;TAB&gt;value</code> per line to Standard Output.</p>
+
+<p>Example:</p>
+
+<pre><code>hello world     3,15 4,12 16,33
+world peace     2,11 7,44 9,59
+john doe        5,21 8,5 11,37
+world peace     2,4 3,60 6,28
+john doe        9,89 5,39 11,2
+john doe        1,56 3,62 8,42
+</code></pre>
+
+<h2>
+<a id="reducer-input-format" class="anchor" href="#reducer-input-format" aria-hidden="true"><span class="octicon octicon-link"></span></a>Reducer Input Format</h2>
+
+<p>As in Hadoop Streaming, all lines with the same key will be grouped together and pass to the same reducer.</p>
+
+<p>Example:</p>
+
+<pre><code>hello world     3,15 4,12 16,33
+john doe        5,21 8,5 11,37
+john doe        9,89 5,39 11,2
+john doe        1,56 3,62 8,42
+world peace     2,11 7,44 9,59
+world peace     2,4 3,60 6,28
+</code></pre>
+
+<h2>
+<a id="mapper-reducer-example-1-word-count" class="anchor" href="#mapper-reducer-example-1-word-count" aria-hidden="true"><span class="octicon octicon-link"></span></a>Mapper Reducer Example 1: Word Count</h2>
+
+<p>Mapper: <code>tr -sc "a-zA-Z" "\n"</code>
+Mapper testing:</p>
+
+<div class="highlight highlight-console"><pre>$ <span class="pl-s1"><span class="pl-c1">echo</span> <span class="pl-s"><span class="pl-pds">'</span>aaa bbb ccc\naaa bbb aaa<span class="pl-pds">'</span></span> <span class="pl-k">|</span> tr -sc <span class="pl-s"><span class="pl-pds">"</span>a-zA-Z<span class="pl-pds">"</span></span> <span class="pl-s"><span class="pl-pds">"</span>\n<span class="pl-pds">"</span></span></span>
+<span class="pl-mo">aaa</span>
+<span class="pl-mo">bbb</span>
+<span class="pl-mo">ccc</span>
+<span class="pl-mo">aaa</span>
+<span class="pl-mo">bbb</span>
+<span class="pl-mo">aaa</span></pre></div>
+
+<p>Reducer: <code>uniq -c</code>
+Reducer testing:</p>
+
+<div class="highlight highlight-console"><pre>$ <span class="pl-s1"><span class="pl-c1">echo</span> <span class="pl-s"><span class="pl-pds">'</span>aaa bbb ccc\naaa bbb aaa<span class="pl-pds">'</span></span> <span class="pl-k">|</span> tr -sc <span class="pl-s"><span class="pl-pds">"</span>a-zA-Z<span class="pl-pds">"</span></span> <span class="pl-s"><span class="pl-pds">"</span>\n<span class="pl-pds">"</span></span> <span class="pl-k">|</span> sort -k 1,1 -t <span class="pl-s"><span class="pl-pds">$'</span><span class="pl-cce">\t</span><span class="pl-pds">'</span></span> <span class="pl-k">|</span> uniq -c</span>
+<span class="pl-mo">      3 aaa</span>
+<span class="pl-mo">      2 bbb</span>
+<span class="pl-mo">      1 ccc</span></pre></div>
+
+<p>Run mapper and reducer with local mapreduce</p>
+
+<div class="highlight highlight-console"><pre>$ <span class="pl-s1">cat data <span class="pl-k">|</span> ./localmapreduce 5m 8  <span class="pl-s"><span class="pl-pds">'</span>tr -sc "a-zA-Z" "\n"<span class="pl-pds">'</span></span> <span class="pl-s"><span class="pl-pds">'</span>uniq -c<span class="pl-pds">'</span></span> out</span>
+$ <span class="pl-s1">cat out/<span class="pl-k">*</span> <span class="pl-k">|</span> head</span>
+<span class="pl-mo"> 148601 a</span>
+<span class="pl-mo">  10605 A</span>
+<span class="pl-mo">     19 aa</span>
+<span class="pl-mo">      1 Aa</span>
+<span class="pl-mo">      9 AA</span>
+<span class="pl-mo">      1 aaai</span>
+<span class="pl-mo">      5 AAAI</span>
+<span class="pl-mo">      4 Aachen</span>
+<span class="pl-mo">      2 AAIA</span>
+<span class="pl-mo">     23 AAM</span></pre></div>
+
+<h2>
+<a id="mapper-reducer-example-2ngram-count-in-python" class="anchor" href="#mapper-reducer-example-2ngram-count-in-python" aria-hidden="true"><span class="octicon octicon-link"></span></a>mapper reducer Example 2：ngram count in python</h2>
+
+<h3>
+<a id="mapper" class="anchor" href="#mapper" aria-hidden="true"><span class="octicon octicon-link"></span></a>mapper</h3>
+
+<p>mapper <em>nc-map.py</em></p>
+
+<div class="highlight highlight-python"><pre><span class="pl-c">#!/usr/bin/env python</span>
+<span class="pl-k">import</span> re
+<span class="pl-k">def</span> <span class="pl-en">tokens</span>(<span class="pl-smi">str1</span>): <span class="pl-k">return</span> re.findall(<span class="pl-s"><span class="pl-pds">'</span>[a-z]+<span class="pl-pds">'</span></span>, str1.lower())
+
+<span class="pl-k">def</span> <span class="pl-en">to_ngrams</span>( <span class="pl-smi">words</span>, <span class="pl-smi">length</span>):
+    <span class="pl-k">return</span> <span class="pl-c1">zip</span>(<span class="pl-k">*</span>[words[i:] <span class="pl-k">for</span> i <span class="pl-k">in</span> <span class="pl-c1">range</span>(length)])  
+
+<span class="pl-k">import</span> fileinput
+<span class="pl-k">from</span> collections <span class="pl-k">import</span> Counter
+<span class="pl-k">for</span> line <span class="pl-k">in</span> fileinput.input():
+    words <span class="pl-k">=</span> tokens(line)
+    <span class="pl-k">for</span> n <span class="pl-k">in</span> <span class="pl-c1">range</span>(<span class="pl-c1">1</span>, <span class="pl-c1">6</span>):
+        ngrams_counts <span class="pl-k">=</span> Counter(to_ngrams(words, n))
+        <span class="pl-k">for</span> ngram, count <span class="pl-k">in</span> ngrams_counts.iteritems():
+            <span class="pl-k">print</span>  <span class="pl-s"><span class="pl-pds">'</span><span class="pl-c1">{}</span><span class="pl-cce">\t</span><span class="pl-c1">{}</span><span class="pl-pds">'</span></span>.format(<span class="pl-s"><span class="pl-pds">'</span> <span class="pl-pds">'</span></span>.join(ngram), count)</pre></div>
+
+<p>mapper testing</p>
+
+<div class="highlight highlight-console"><pre>$ <span class="pl-s1"><span class="pl-c1">echo</span> <span class="pl-s"><span class="pl-pds">'</span>aaa bbb ccc\naaa bbb aaa<span class="pl-pds">'</span></span> <span class="pl-k">|</span> python nc-map.py</span>
+<span class="pl-mo">bbb     1</span>
+<span class="pl-mo">ccc     1</span>
+<span class="pl-mo">aaa     1</span>
+<span class="pl-mo">aaa bbb 1</span>
+<span class="pl-mo">bbb ccc 1</span>
+<span class="pl-mo">aaa bbb ccc     1</span>
+<span class="pl-mo">bbb     1</span>
+<span class="pl-mo">aaa     2</span>
+<span class="pl-mo">aaa bbb 1</span>
+<span class="pl-mo">bbb aaa 1</span>
+<span class="pl-mo">aaa bbb aaa     1</span></pre></div>
+
+<h3>
+<a id="reducer" class="anchor" href="#reducer" aria-hidden="true"><span class="octicon octicon-link"></span></a>reducer</h3>
+
+<p>reducer <em>nc-reduce.py</em></p>
+
+<div class="highlight highlight-python"><pre><span class="pl-c">#!/usr/bin/env python</span>
+<span class="pl-k">import</span> fileinput
+<span class="pl-k">from</span> collections <span class="pl-k">import</span> Counter, defaultdict
+ngram_counts <span class="pl-k">=</span> defaultdict(Counter)
+<span class="pl-k">for</span> line <span class="pl-k">in</span> fileinput.input():
+    ngram, count <span class="pl-k">=</span> line.split(<span class="pl-s"><span class="pl-pds">'</span><span class="pl-cce">\t</span><span class="pl-pds">'</span></span>, <span class="pl-c1">1</span>)
+    ngram, count <span class="pl-k">=</span> <span class="pl-c1">tuple</span>(ngram.split(<span class="pl-s"><span class="pl-pds">'</span> <span class="pl-pds">'</span></span>)), <span class="pl-c1">int</span>(count)
+    length <span class="pl-k">=</span> <span class="pl-c1">len</span>(ngram)
+    ngram_counts[length][ngram] <span class="pl-k">+=</span> count
+
+<span class="pl-k">for</span> length <span class="pl-k">in</span> ngram_counts:
+    <span class="pl-k">for</span> ngram, count <span class="pl-k">in</span> ngram_counts[length].iteritems():
+        <span class="pl-k">print</span> <span class="pl-s"><span class="pl-pds">'</span><span class="pl-c1">{}</span><span class="pl-cce">\t</span><span class="pl-c1">{}</span><span class="pl-pds">'</span></span>.format(<span class="pl-s"><span class="pl-pds">'</span> <span class="pl-pds">'</span></span>.join(ngram), count)</pre></div>
+
+<p>reducer testing</p>
+
+<div class="highlight highlight-console"><pre>$ <span class="pl-s1"><span class="pl-c1">echo</span> <span class="pl-s"><span class="pl-pds">'</span>aaa bbb ccc\naaa bbb aaa<span class="pl-pds">'</span></span> <span class="pl-k">|</span> python nc-map.py <span class="pl-k">|</span> sort -k 1,1 -t <span class="pl-s"><span class="pl-pds">$'</span><span class="pl-cce">\t</span><span class="pl-pds">'</span></span> <span class="pl-k">|</span> python nc-reduce.py</span>
+<span class="pl-mo">bbb     2</span>
+<span class="pl-mo">ccc     1</span>
+<span class="pl-mo">aaa     3</span>
+<span class="pl-mo">aaa bbb 2</span>
+<span class="pl-mo">bbb ccc 1</span>
+<span class="pl-mo">bbb aaa 1</span>
+<span class="pl-mo">aaa bbb ccc     1</span>
+<span class="pl-mo">aaa bbb aaa     1</span></pre></div>
+
+<h3>
+<a id="run-with-localmapreduce" class="anchor" href="#run-with-localmapreduce" aria-hidden="true"><span class="octicon octicon-link"></span></a>run with localmapreduce</h3>
+
+<div class="highlight highlight-console"><pre>$ <span class="pl-s1">cat data <span class="pl-k">|</span> ./localmapreduce 5m 16  <span class="pl-s"><span class="pl-pds">'</span>python nc-map.py<span class="pl-pds">'</span></span> <span class="pl-s"><span class="pl-pds">'</span>python nc-reduce.py<span class="pl-pds">'</span></span> nc-out</span>
+$ <span class="pl-s1">cat nc-out/<span class="pl-k">*</span> <span class="pl-k">|</span> head</span>
+<span class="pl-mo">scoring 121</span>
+<span class="pl-mo">kazhdan 2</span>
+<span class="pl-mo">crex    3</span>
+<span class="pl-mo">blastsets       3</span>
+<span class="pl-mo">glycoside       1</span>
+<span class="pl-mo">brieflyreview   1</span>
+<span class="pl-mo">seriesparallel  2</span>
+<span class="pl-mo">stle    1</span>
+<span class="pl-mo">abar    1</span>
+<span class="pl-mo">paralleled      4</span></pre></div>
+
+      <footer class="site-footer">
+        <span class="site-footer-owner"><a href="https://github.com/d2207197/local-mapreduce">Local-mapreduce</a> is maintained by <a href="https://github.com/d2207197">d2207197</a>.</span>
+
+        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
+      </footer>
+
+    </section>
+
+  
+  </body>
+</html>
+
