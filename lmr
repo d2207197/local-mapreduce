@@ -68,7 +68,7 @@ trap 'clean_up; exit' SIGHUP SIGINT SIGTERM
 cat <<EOF > "${HASHING_SCRIPT}"
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from __future__ import print_function
+from __future__ import print_function, unicode_literals
 import sys, gzip, re, os, fileinput, io
 def tokens(str1): return re.findall('[a-z]+', str1.lower())
 N_REDUCER, MAPPER_ID, BASE_DIR  = int(sys.argv[1]), int(sys.argv[2]), sys.argv[3]
@@ -89,7 +89,7 @@ seg_file = [ outfile(seg_id) for seg_id in range(N_REDUCER) ]
 
 for line in fileinput.input(sys.argv[4:]):
     key, _,value = line[:-1].partition('\t')
-    print( u'{}\t{}'.format(key.decode('utf8'), value.decode('utf8')), file = seg_file[hash(key) % N_REDUCER])
+    print( '{}\t{}'.format(key, value), file = seg_file[hash(key) % N_REDUCER])
 fileinput.close()
 for seg_id in range(N_REDUCER): seg_file[seg_id].close()
 EOF
@@ -101,7 +101,7 @@ echo
 parallel --pipe --block "${BLOCKSIZE}"  --ungroup   "echo -n $'\e[s\e[F\e[2K           #{#}\e[u' ; ${MAPPER}  | python $HASHING_SCRIPT ${NUM_HASHING_SEGS} {#} $TEMPDIR " # pipe to here
 # parallel --pipe --block "$1" "$3 | python $HASHING_SCRIPT $2 1 $TEMPDIR" # io.open line buffering
 # echo $TEMPDIR
-parallel   --ungroup "sort -k 1,1 -t $'\t' {}/*  | ${REDUCER} > '${OUTPUT_DIR}/{/.}'"  ::: "${TEMPDIR}"/*
+parallel   --ungroup "sort -k 1,1 -t $'\t' -s {}/*  | ${REDUCER} > '${OUTPUT_DIR}/{/.}'"  ::: "${TEMPDIR}"/*
 echo  $' \e[1;33m>>>\e[m' Reducer running. Temporary input directory: $'\e[1;32m'"$TEMPDIR"$'\e[m'
 {
     clean_up
