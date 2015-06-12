@@ -17,16 +17,16 @@ Simulating Hadoop MapReduce Streaming in a multicore computer. Any mapper, reduc
   python reduce.py > result_single  217.10s user 0.26s system 50% cpu 7:09.38 total
   ```
 
-- localmapreduce
+- local-mapreduce
 
   Elapsed time: 1 min 18 secs. Five times faster
 
 
   ```console
-  $ rm -r result ; time pv citeseerx_descriptions_sents.txt.300000 | ./localmapreduce 2m 16 'python map.py' 'python reduce.py' result
+  $ rm -r result ; time pv citeseerx_descriptions_sents.txt.300000 | ./lmr 2m 16 'python map.py' 'python reduce.py' result
   37.6MiB 0:00:23 [1.58MiB/s] [====================================================================================================>] 100%
   pv citeseerx_descriptions_sents.txt.300000  0.01s user 0.03s system 0% cpu 23.789 total
-  ./localmapreduce 2m 16 'python map.py' 'python reduce.py' result  1024.95s user 11.64s system 1318% cpu 1:18.63 total
+  ./lmr 2m 16 'python map.py' 'python reduce.py' result  1024.95s user 11.64s system 1318% cpu 1:18.63 total
   ```
 
 ## Prerequisite
@@ -43,8 +43,8 @@ Simulating Hadoop MapReduce Streaming in a multicore computer. Any mapper, reduc
 ## Usage
 
 ```console
-$ cat <data> | ./localmapreduce <chunk size> <num of reducer> <mapper> <reducer> <output directory>
-$ ./localmapreduce <chunk size> <num of jobs> <mapper> <reducer> <output directory> < <data>
+$ cat <data> | ./lmr <chunk size> <num of reducer> <mapper> <reducer> <output directory>
+$ ./lmr <chunk size> <num of jobs> <mapper> <reducer> <output directory> < <data>
 ```
 
 - `<chunk size>`: Split input data into chunks with `<chunk size>`. The number of chunks equals to the total number of mapper.
@@ -113,7 +113,7 @@ $ echo 'aaa bbb ccc\naaa bbb aaa' | tr -sc "a-zA-Z" "\n" | sort -k 1,1 -t $'\t' 
 Run mapper and reducer with local mapreduce
 
 ```console
-$ cat data | ./localmapreduce 5m 8  'tr -sc "a-zA-Z" "\n"' 'uniq -c' out
+$ cat data | ./lmr 5m 8  'tr -sc "a-zA-Z" "\n"' 'uniq -c' out
 $ cat out/* | head
  148601 a
   10605 A
@@ -209,7 +209,7 @@ aaa bbb aaa     1
 ### run with localmapreduce  ###
 
 ```console
-$ cat data | ./localmapreduce 5m 16  'python nc-map.py' 'python nc-reduce.py' nc-out
+$ cat data | ./lmr 5m 16  'python nc-map.py' 'python nc-reduce.py' nc-out
 $ cat nc-out/* | head
 scoring 121
 kazhdan 2
