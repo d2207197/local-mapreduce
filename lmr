@@ -37,6 +37,7 @@ HASHING_SCRIPT=`mktemp hashing.py.XXXX`
 }>&2
 TEMPDIR=`mktemp -d mapper_tmp.XXXX`
 {
+    mkdir `seq -f $TEMPDIR'/reducer-%02g' 0 $NUM_HASHING_SEGS`
     echo $' \e[1;32m>>>\e[m Temporary mapper output directory created: \e[1;32m'$TEMPDIR$'\e[m'
 }>&2
 
@@ -63,19 +64,12 @@ import sys, os, fileinput
 
 N_REDUCER, MAPPER_ID, BASE_DIR  = int(sys.argv[1]), int(sys.argv[2]), sys.argv[3]
 
-def outfile(seg_id):
-    segdir = os.path.join(BASE_DIR, f"reducer-{seg_id:02}")
-    try: os.makedirs(segdir)
-    except OSError : pass
-    return open(f"{segdir}/mapper-{MAPPER_ID:02}", 'w')
-
-seg_file = [outfile(seg_id) for seg_id in range(N_REDUCER)]
+seg_file = [open(os.path.join(BASE_DIR, f"reducer-{seg_id:02}", f"mapper-{MAPPER_ID:02}"), 'w')
+            for seg_id in range(N_REDUCER)]
 
 for line in fileinput.input(sys.argv[4:]):
     key, _, value = line.rstrip().partition('\t')
     print(key, value, sep='\t', file=seg_file[hash(key) % N_REDUCER])
-fileinput.close()
-for seg_id in range(N_REDUCER): seg_file[seg_id].close()
 EOF
 
 START_TIME=timer
