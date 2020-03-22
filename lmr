@@ -12,7 +12,7 @@ do
 done
 shift $((OPTIND-1))
 
-[ "$#" -ne 5 ] && usage
+[ $# -ne 5 ] && usage
 
 BLOCKSIZE="$1"
 NUM_HASHING_SEGS="$2"
@@ -37,7 +37,7 @@ HASHING_SCRIPT=`mktemp hashing.py.XXXX`
 }>&2
 TEMPDIR=`mktemp -d mapper_tmp.XXXX`
 {
-    mkdir `seq -f $TEMPDIR'/reducer-%02g' 0 $NUM_HASHING_SEGS`
+    mkdir `seq -f $TEMPDIR'/reducer-%02g' 0 $((NUM_HASHING_SEGS-1))`
     echo $' \e[1;32m>>>\e[m Temporary mapper output directory created: \e[1;32m'$TEMPDIR$'\e[m'
 }>&2
 
