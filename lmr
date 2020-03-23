@@ -55,7 +55,8 @@ function clean_up() {
     echo  $' \e[1;32m>>>\e[m' Temporary hashing script deleted: $'\e[1;32m'"$HASHING_SCRIPT"$'\e[m' ||
     echo  $' \e[1;31m*\e[m' Failed to delete hashing script: $'\e[1;32m'"$HASHING_SCRIPT"$'\e[m'
 } >&2
-trap 'clean_up; exit' SIGHUP SIGINT SIGTERM EXIT
+trap 'clean_up' EXIT
+trap 'exit' SIGHUP SIGINT SIGTERM
 
 cat <<EOF > "${HASHING_SCRIPT}"
 #!/usr/bin/env python
