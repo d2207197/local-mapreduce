@@ -76,10 +76,14 @@ START_TIME=timer
 
 echo $' \e[1;33m>>>\e[m' Mappers running... $'\e[1;33m'$(timer START_TIME)$'\e[m'
 echo
-parallel --pipe --block "${BLOCKSIZE}" --ungroup "echo -n $'\e[s\e[F\e[2K           #{#}\e[u'; ${MAPPER} | PYTHONHASHSEED=0 python $HASHING_SCRIPT ${NUM_HASHING_SEGS} {#} $TEMPDIR" # pipe to here
 
-echo -n $' \e[1;33m>>>\e[m' Reducer running... $'\e[1;33m'$(timer START_TIME)$'\e[m'
-parallel --ungroup "sort -k 1,1 -t $'\t' {}/* | ${REDUCER} > '${OUTPUT_DIR}/{/.}'"  ::: "${TEMPDIR}"/*
+parallel --pipe --block-size "${BLOCKSIZE}" --ungroup --halt now,fail=1 \
+"echo -n $'\e[s\e[F\e[2K           #{#}\e[u'; ${MAPPER} | PYTHONHASHSEED=0 python $HASHING_SCRIPT ${NUM_HASHING_SEGS} {#} $TEMPDIR" &&
+{
+    echo -n $' \e[1;33m>>>\e[m' Reducer running... $'\e[1;33m'$(timer START_TIME)$'\e[m'
+    parallel -u --halt now,fail=1 \
+    "sort -k1 -t $'\t' {}/* | ${REDUCER} > '${OUTPUT_DIR}/{/.}'"  ::: "${TEMPDIR}"/*
+} &&
 {
     echo
     echo  $' \e[1;33m*\e[m' Output directory: $'\e[1;32m'"$OUTPUT_DIR"$'\e[m'
