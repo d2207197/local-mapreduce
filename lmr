@@ -81,8 +81,8 @@ echo
 parallel --pipe --block-size "${BLOCKSIZE}" --ungroup --halt now,fail=1 \
 "echo -n $'\e[s\e[F\e[2K           #{#}\e[u'; ${MAPPER} | PYTHONHASHSEED=0 python $HASHING_SCRIPT ${NUM_HASHING_SEGS} {#} $TEMPDIR" &&
 {
-    echo -n $' \e[1;33m>>>\e[m' Reducer running... $'\e[1;33m'$(timer START_TIME)$'\e[m'
-    parallel -u --halt now,fail=1 \
+    echo $' \e[1;33m>>>\e[m' Reducer running... $'\e[1;33m'$(timer START_TIME)$'\e[m'
+    parallel --ungroup --halt now,fail=1 \
     "sort -k1 -t $'\t' {}/* | ${REDUCER} > '${OUTPUT_DIR}/{/.}'"  ::: "${TEMPDIR}"/*
 } &&
 {
