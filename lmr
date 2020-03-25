@@ -83,12 +83,12 @@ parallel --pipe --block-size "${BLOCKSIZE}" --ungroup --halt now,fail=1 \
 {
     echo $' \e[1;33m>>>\e[m' Sort parts running... $'\e[1;33m'$(timer START_TIME)$'\e[m'
     parallel --bar --ungroup --halt now,fail=1 \
-    "sort -k1,1 -t $'\t' -o {} {}" ::: "${TEMPDIR}"/*/*
+    "LC_ALL=C sort -k1,1 -t $'\t' -o {} {}" ::: "${TEMPDIR}"/*/*
 } &&
 {
     echo $' \e[1;33m>>>\e[m' Reducer running... $'\e[1;33m'$(timer START_TIME)$'\e[m'
     parallel --bar --ungroup --halt now,fail=1 \
-    "sort -m -k1,1 -t $'\t' {}/* | ${REDUCER} > '${OUTPUT_DIR}/{/.}'" ::: "${TEMPDIR}"/*
+    "LC_ALL=C sort -m -k1,1 -t $'\t' {}/* | ${REDUCER} > '${OUTPUT_DIR}/{/.}'" ::: "${TEMPDIR}"/*
 } &&
 {
     echo
