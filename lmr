@@ -83,7 +83,7 @@ parallel --pipe --block-size "${BLOCKSIZE}" --ungroup --halt now,fail=1 \
 {
     echo $' \e[1;33m>>>\e[m' Reducer running... $'\e[1;33m'$(timer START_TIME)$'\e[m'
     parallel --ungroup --halt now,fail=1 \
-    "sort -k1 -t $'\t' {}/* | ${REDUCER} > '${OUTPUT_DIR}/{/.}'"  ::: "${TEMPDIR}"/*
+    "sort -k1,1 -t $'\t' {}/* | ${REDUCER} > '${OUTPUT_DIR}/{/.}'" ::: "${TEMPDIR}"/*
 } &&
 {
     echo
