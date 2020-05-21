@@ -43,8 +43,9 @@ Simulating Hadoop MapReduce Streaming in a multicore computer. Any mapper, reduc
 ## Install
 
 ```console
-$ git clone  --depth 1 https://github.com/d2207197/local-mapreduce.git
-$ sudo ln -s local-mapreduce/lmr /usr/local/bin
+$ git clone --depth 1 https://github.com/d2207197/local-mapreduce.git
+$ sudo ln -s `pwd`/local-mapreduce/lmr /usr/local/bin
+# refresh PATH
 $ hash -r
 ```
 ## Usage
